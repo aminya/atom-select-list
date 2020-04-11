@@ -1,7 +1,7 @@
 // TODO: fix redundant returns in methods
 
 const etch = require('etch')
-import {Disposable, CompositeDisposable, TextEditor, CommandEvent } from 'atom'
+import { Disposable, CompositeDisposable, TextEditor, CommandEvent } from 'atom'
 const $ = etch.dom
 import fuzzaldrin from 'fuzzaldrin'
 
@@ -9,89 +9,92 @@ import fuzzaldrin from 'fuzzaldrin'
 type EtchElement = HTMLElement
 
 declare interface SelectListProperties {
-
-  // an array containing the objects you want to show in the select list.
+  /** an array containing the objects you want to show in the select list. */
   items: Array<object | string>
 
-  // a function that is called whenever an item needs to be displayed.
-  //
-  // `options: { selected: boolean, index: number, visible: boolean }`
-  //
-  // - `selected`: indicating whether item is selected or not.
-  // - `index`: item's index.
-  // - `visible`: indicating whether item is visible in viewport or not. Unless initiallyVisibleItemCount was given, this value is always true.
-  elementForItem: (item: object | string, options: { selected: boolean, index: number, visible: boolean }) => EtchElement // TODO: HTMLElement
+  /**
+   * a function that is called whenever an item needs to be displayed.
+   *
+   * `options: { selected: boolean, index: number, visible: boolean }`
+   *
+   * - `selected`: indicating whether item is selected or not.
+   * - `index`: item's index.
+   * - `visible`: indicating whether item is visible in viewport or not. Unless initiallyVisibleItemCount was given, this value is always true.
+   */
+  elementForItem: (
+    item: object | string,
+    options: { selected: boolean; index: number; visible: boolean }
+  ) => EtchElement // TODO: HTMLElement
 
-  // (Optional) the number of maximum items that are shown.
+  /** (Optional) the number of maximum items that are shown. */
   maxResults?: number
 
-  // (Optional) a function that allows to decide which items to show whenever the query changes. By default, it uses fuzzaldrin to filter results.
+  /** (Optional) a function that allows to decide which items to show whenever the query changes. By default, it uses fuzzaldrin to filter results. */
   filter?: (items: Array<object | string>, query: string) => Array<object>
 
-  // (Optional) when filter is not provided, this function will be called to retrieve a string property on each item and that will be used to filter them.
+  /** (Optional) when filter is not provided, this function will be called to retrieve a string property on each item and that will be used to filter them. */
   filterKeyForItem?: (item: object | string) => string
 
-  // (Optional) a function that allows to apply a transformation to the user query and whose return value will be used to filter items.
+  /** (Optional) a function that allows to apply a transformation to the user query and whose return value will be used to filter items. */
   filterQuery?: (query: string) => string
 
-  // (Optional) a string that will replace the contents of the query editor.
+  /** (Optional) a string that will replace the contents of the query editor. */
   query?: string
 
-  // (Optional)  a boolean indicating whether the query text should be selected or not.
+  /** (Optional)  a boolean indicating whether the query text should be selected or not. */
   selectQuery?: boolean
 
-  // (Optional)  a function that allows to change the order in which items are shown.
+  /** (Optional)  a function that allows to change the order in which items are shown. */
   order?: (item1: object | string, item2: object | string) => number
 
-  // (Optional) a string shown when the list is empty.
+  /** (Optional) a string shown when the list is empty. */
   emptyMessage?: string
 
-  // (Optional) a string that needs to be set when you want to notify the user that an error occurred.
+  /** (Optional) a string that needs to be set when you want to notify the user that an error occurred. */
   errorMessage?: string
 
-  // (Optional) a string that needs to be set when you want to provide some information to the user.
+  /** (Optional) a string that needs to be set when you want to provide some information to the user. */
   infoMessage?: string
 
-  // (Optional) a string that needs to be set when you are loading items in the background.
+  /** (Optional) a string that needs to be set when you are loading items in the background. */
   loadingMessage?: string
 
-  // (Optional) a string or number that needs to be set when the progress status changes (e.g. a percentage showing how many items have been loaded so far).
+  /** (Optional) a string or number that needs to be set when the progress status changes (e.g. a percentage showing how many items have been loaded so far). */
   loadingBadge?: string | number
 
-  // (Optional) an array of strings that will be added as class names to the items element.
+  /** (Optional) an array of strings that will be added as class names to the items element. */
   itemsClassList?: Array<string>
 
-  // (Optional) the index of the item to initially select and automatically select after query changes; defaults to 0.
+  /** (Optional) the index of the item to initially select and automatically select after query changes; defaults to 0. */
   initialSelectionIndex?: number
 
-  // (Optional) a function that is called when the query changes.
+  /** (Optional) a function that is called when the query changes. */
   didChangeQuery?: (query: string) => void
 
-  // (Optional) a function that is called when the selected item changes.
+  /** (Optional) a function that is called when the selected item changes. */
   didChangeSelection?: (item: object | string) => void
 
-  // (Optional) a function that is called when the user clicks or presses Enter on an item.
+  /** (Optional) a function that is called when the user clicks or presses Enter on an item. */
   didConfirmSelection?: (item: object | string) => void
 
-  // (Optional) a function that is called when the user presses Enter but the list is empty.
+  /** (Optional) a function that is called when the user presses Enter but the list is empty. */
   didConfirmEmptySelection?: () => void
 
-  // (Optional) a function that is called when the user presses Esc or the list loses focus.
+  /** (Optional) a function that is called when the user presses Esc or the list loses focus. */
   didCancelSelection?: () => void
 
-  // (Optional) When this options was provided, SelectList observe visibility of items in viewport, visibility state is passed as visible option to elementForItem. This is mainly used to skip heavy computation for invisible items.
+  /** (Optional) When this options was provided, SelectList observe visibility of items in viewport, visibility state is passed as visible option to elementForItem. This is mainly used to skip heavy computation for invisible items. */
   initiallyVisibleItemCount?: number
 
   skipCommandsRegistration: boolean
 }
 
 class SelectListView {
-
-  // When creating a new instance of a select list, or when calling `update` on an existing one, you can supply an object with the typeof SelectListProperties
+  /** When creating a new instance of a select list, or when calling `update` on an existing one, you can supply an object with the typeof SelectListProperties */
   props: SelectListProperties
 
-  // an array containing the objects you want to show in the select list.
-  items: Array<object| string>  // TODO: Added initializer! Either fix this.items or assign it in constructor
+  /** an array containing the objects you want to show in the select list. */
+  items: Array<object | string> // TODO: Added initializer! Either fix this.items or assign it in constructor
 
   private disposables: CompositeDisposable
   private element: EtchElement
@@ -99,17 +102,17 @@ class SelectListView {
   private visibilityObserver: IntersectionObserver
   private listItems: any[] | null
   private selectionIndex: number | undefined
-  private refs: any;
+  private refs: any
 
-  static setScheduler (scheduler) {
+  static setScheduler(scheduler) {
     etch.setScheduler(scheduler)
   }
 
-  static getScheduler (scheduler) {
+  static getScheduler(scheduler) {
     return etch.getScheduler()
   }
 
-  constructor (props: SelectListProperties) {
+  constructor(props: SelectListProperties) {
     this.props = props
     this.items = props.items // TODO: Added initializer! Either fix this.items or assign it in constructor
 
@@ -131,21 +134,27 @@ class SelectListView {
     const didLoseFocus = this.didLoseFocus.bind(this)
     editorElement.addEventListener('blur', didLoseFocus)
 
-    // When clicking the scrollbar of the items list, a blur event will be triggered
-    // on the query editor element, but we don't want to treat that as a cancellation.
-    // This mousedown listener allows us to detect this case and restore focus to the
-    // query editor. This is based on https://stackoverflow.com/a/1480178.
+    /**
+     * When clicking the scrollbar of the items list, a blur event will be triggered
+     * on the query editor element, but we don't want to treat that as a cancellation.
+     * This mousedown listener allows us to detect this case and restore focus to the
+     * query editor. This is based on https://stackoverflow.com/a/1480178.
+     */
     this.didClickItemsList = false
-    this.element.addEventListener('mousedown', event => {
+    this.element.addEventListener('mousedown', (event) => {
       if (event.target === this.refs.items) {
         this.didClickItemsList = true
       }
     })
-    this.disposables.add(new Disposable(() => { editorElement.removeEventListener('blur', didLoseFocus) }))
+    this.disposables.add(
+      new Disposable(() => {
+        editorElement.removeEventListener('blur', didLoseFocus)
+      })
+    )
   }
 
-  initializeVisibilityObserver () {
-    this.visibilityObserver = new IntersectionObserver(changes => {
+  initializeVisibilityObserver() {
+    this.visibilityObserver = new IntersectionObserver((changes) => {
       for (const change of changes) {
         if (change.intersectionRatio > 0) {
           const element = change.target
@@ -159,11 +168,11 @@ class SelectListView {
     })
   }
 
-  focus () {
+  focus() {
     this.refs.queryEditor.element.focus()
   }
 
-  didLoseFocus (event) {
+  didLoseFocus(event) {
     if (this.didClickItemsList || this.element.contains(event.relatedTarget)) {
       this.didClickItemsList = false
       this.refs.queryEditor.element.focus()
@@ -172,17 +181,17 @@ class SelectListView {
     }
   }
 
-  reset () {
+  reset() {
     this.refs.queryEditor.setText('')
   }
 
-  destroy () {
+  destroy() {
     this.disposables.dispose()
     if (this.visibilityObserver) this.visibilityObserver.disconnect()
     return etch.destroy(this)
   }
 
-  registerAtomCommands () {
+  registerAtomCommands() {
     return atom.commands.add(this.element, {
       'core:move-up': (event: CommandEvent) => {
         this.selectPrevious()
@@ -207,12 +216,12 @@ class SelectListView {
       'core:cancel': (event: CommandEvent) => {
         this.cancelSelection()
         event.stopPropagation()
-      }
+      },
     })
   }
 
-  update (props: SelectListProperties = {}) {
-    // TODO: default value {}
+  update(props: SelectListProperties = {}) {
+    /** TODO: default value {} */
 
     let shouldComputeItems = false
 
@@ -237,8 +246,8 @@ class SelectListView {
     }
 
     if (props.hasOwnProperty('query')) {
-      // Items will be recomputed as part of the change event handler, so we
-      // don't need to recompute them again at the end of this function.
+      /** Items will be recomputed as part of the change event handler, so we */
+      /** don't need to recompute them again at the end of this function. */
       this.refs.queryEditor.setText(props.query)
       shouldComputeItems = false
     }
@@ -290,10 +299,10 @@ class SelectListView {
     return etch.update(this)
   }
 
-  render () {
+  render() {
     return $.div(
       {},
-      $(TextEditor, {ref: 'queryEditor', mini: true}),
+      $(TextEditor, { ref: 'queryEditor', mini: true }),
       this.renderLoadingMessage(),
       this.renderInfoMessage(),
       this.renderErrorMessage(),
@@ -301,15 +310,17 @@ class SelectListView {
     )
   }
 
-  renderItems () {
+  renderItems() {
     if (this.items.length > 0) {
       const className = ['list-group'].concat(this.props.itemsClassList || []).join(' ')
 
       if (this.visibilityObserver) {
         etch.getScheduler().updateDocument(() => {
-          Array.from(this.refs.items.children).slice(this.props.initiallyVisibleItemCount).forEach(element => {
-            this.visibilityObserver.observe(element)
-          })
+          Array.from(this.refs.items.children)
+            .slice(this.props.initiallyVisibleItemCount)
+            .forEach((element) => {
+              this.visibilityObserver.observe(element)
+            })
         })
       }
 
@@ -317,52 +328,49 @@ class SelectListView {
         const selected = this.getSelectedItem() === item
         const visible = !this.props.initiallyVisibleItemCount || index < this.props.initiallyVisibleItemCount
         return $(ListItemView, {
-          element: this.props.elementForItem(item, {selected, index, visible}),
+          element: this.props.elementForItem(item, { selected, index, visible }),
           selected: selected,
-          onclick: () => this.didClickItem(index)
+          onclick: () => this.didClickItem(index),
         })
       })
 
-      return $.ol(
-        {className, ref: 'items'},
-        ...this.listItems
-      )
+      return $.ol({ className, ref: 'items' }, ...this.listItems)
     } else if (!this.props.loadingMessage && this.props.emptyMessage) {
-      return $.span({ref: 'emptyMessage'}, this.props.emptyMessage)
+      return $.span({ ref: 'emptyMessage' }, this.props.emptyMessage)
     } else {
-      return ""
+      return ''
     }
   }
 
-  renderErrorMessage () {
+  renderErrorMessage() {
     if (this.props.errorMessage) {
-      return $.span({ref: 'errorMessage'}, this.props.errorMessage)
+      return $.span({ ref: 'errorMessage' }, this.props.errorMessage)
     } else {
       return ''
     }
   }
 
-  renderInfoMessage () {
+  renderInfoMessage() {
     if (this.props.infoMessage) {
-      return $.span({ref: 'infoMessage'}, this.props.infoMessage)
+      return $.span({ ref: 'infoMessage' }, this.props.infoMessage)
     } else {
       return ''
     }
   }
 
-  renderLoadingMessage () {
+  renderLoadingMessage() {
     if (this.props.loadingMessage) {
       return $.div(
-        {className: 'loading'},
-        $.span({ref: 'loadingMessage', className: 'loading-message'}, this.props.loadingMessage),
-        this.props.loadingBadge ? $.span({ref: 'loadingBadge', className: 'badge'}, this.props.loadingBadge) : ''
+        { className: 'loading' },
+        $.span({ ref: 'loadingMessage', className: 'loading-message' }, this.props.loadingMessage),
+        this.props.loadingBadge ? $.span({ ref: 'loadingBadge', className: 'badge' }, this.props.loadingBadge) : ''
       )
     } else {
       return ''
     }
   }
 
-  getQuery () {
+  getQuery() {
     if (this.refs && this.refs.queryEditor) {
       return this.refs.queryEditor.getText()
     } else {
@@ -370,11 +378,11 @@ class SelectListView {
     }
   }
 
-  getFilterQuery () {
+  getFilterQuery() {
     return this.props.filterQuery ? this.props.filterQuery(this.getQuery()) : this.getQuery()
   }
 
-  didChangeQuery () {
+  didChangeQuery() {
     if (this.props.didChangeQuery) {
       this.props.didChangeQuery(this.getFilterQuery())
     }
@@ -382,12 +390,12 @@ class SelectListView {
     this.computeItems()
   }
 
-  didClickItem (itemIndex: number) {
+  didClickItem(itemIndex: number) {
     this.selectIndex(itemIndex)
     this.confirmSelection()
   }
 
-  computeItems (updateComponent?: boolean) {
+  computeItems(updateComponent?: boolean) {
     this.listItems = null
     if (this.visibilityObserver) this.visibilityObserver.disconnect()
     const filterFn = this.props.filter || this.fuzzyFilter.bind(this)
@@ -402,7 +410,7 @@ class SelectListView {
     this.selectIndex(this.props.initialSelectionIndex, updateComponent)
   }
 
-  fuzzyFilter (items: Array<object | string>, query?: string) {
+  fuzzyFilter(items: Array<object | string>, query?: string) {
     if (query.length === 0) {
       return items
     } else {
@@ -411,7 +419,7 @@ class SelectListView {
         const string = this.props.filterKeyForItem ? this.props.filterKeyForItem(item) : item
         const score = fuzzaldrin.score(string, query)
         if (score > 0) {
-          scoredItems.push({item, score})
+          scoredItems.push({ item, score })
         }
       }
       scoredItems.sort((a, b) => b.score - a.score)
@@ -419,46 +427,46 @@ class SelectListView {
     }
   }
 
-  getSelectedItem () {
+  getSelectedItem() {
     if (this.selectionIndex === undefined) return null
     return this.items[this.selectionIndex]
   }
 
-  renderItemAtIndex (index: number) {
+  renderItemAtIndex(index: number) {
     const item = this.items[index]
     const selected = this.getSelectedItem() === item
     const component = this.listItems[index].component
     if (this.visibilityObserver) this.visibilityObserver.unobserve(component.element)
     component.update({
-      element: this.props.elementForItem(item, {selected, index, visible: true}),
+      element: this.props.elementForItem(item, { selected, index, visible: true }),
       selected: selected,
-      onclick: () => this.didClickItem(index)
+      onclick: () => this.didClickItem(index),
     })
   }
 
-  selectPrevious () {
+  selectPrevious() {
     if (this.selectionIndex === undefined) return this.selectLast()
     return this.selectIndex(this.selectionIndex - 1)
   }
 
-  selectNext () {
+  selectNext() {
     if (this.selectionIndex === undefined) return this.selectFirst()
     return this.selectIndex(this.selectionIndex + 1)
   }
 
-  selectFirst () {
+  selectFirst() {
     return this.selectIndex(0)
   }
 
-  selectLast () {
+  selectLast() {
     return this.selectIndex(this.items.length - 1)
   }
 
-  selectNone () {
+  selectNone() {
     return this.selectIndex(undefined)
   }
 
-  selectIndex (index: number, updateComponent = true) {
+  selectIndex(index: number, updateComponent = true) {
     if (index >= this.items.length) {
       index = 0
     } else if (index < 0) {
@@ -485,7 +493,7 @@ class SelectListView {
     }
   }
 
-  selectItem (item: object | string) {
+  selectItem(item: object | string) {
     const index = this.items.indexOf(item)
     if (index === -1) {
       throw new Error('Cannot select the specified item because it does not exist.')
@@ -494,7 +502,7 @@ class SelectListView {
     }
   }
 
-  confirmSelection () {
+  confirmSelection() {
     const selectedItem = this.getSelectedItem()
     if (selectedItem != null) {
       if (this.props.didConfirmSelection) {
@@ -507,7 +515,7 @@ class SelectListView {
     }
   }
 
-  cancelSelection () {
+  cancelSelection() {
     if (this.props.didCancelSelection) {
       this.props.didCancelSelection()
     }
@@ -520,7 +528,7 @@ class ListItemView {
   public onclick: () => void
   public domEventsDisposable: Disposable
 
-  constructor (props: { element: EtchElement ; selected: boolean; onclick: () => void } ) {
+  constructor(props: { element: EtchElement; selected: boolean; onclick: () => void }) {
     this.mouseDown = this.mouseDown.bind(this)
     this.mouseUp = this.mouseUp.bind(this)
     this.didClick = this.didClick.bind(this)
@@ -541,25 +549,25 @@ class ListItemView {
     etch.getScheduler().updateDocument(this.scrollIntoViewIfNeeded.bind(this))
   }
 
-  mouseDown (event: MouseEvent) {
+  mouseDown(event: MouseEvent) {
     event.preventDefault()
   }
 
-  mouseUp (event: MouseEvent) {
+  mouseUp(event: MouseEvent) {
     event.preventDefault()
   }
 
-  didClick (event: MouseEvent) {
+  didClick(event: MouseEvent) {
     event.preventDefault()
     this.onclick()
   }
 
-  destroy () {
+  destroy() {
     this.element.remove()
     this.domEventsDisposable.dispose()
   }
 
-  update (props: { element: EtchElement ; selected: boolean; onclick: () => void }) {
+  update(props: { element: EtchElement; selected: boolean; onclick: () => void }) {
     this.element.removeEventListener('mousedown', this.mouseDown)
     this.element.removeEventListener('mouseup', this.mouseUp)
     this.element.removeEventListener('click', this.didClick)
@@ -578,7 +586,7 @@ class ListItemView {
     etch.getScheduler().updateDocument(this.scrollIntoViewIfNeeded.bind(this))
   }
 
-  scrollIntoViewIfNeeded () {
+  scrollIntoViewIfNeeded() {
     if (this.selected) {
       this.element.scrollIntoViewIfNeeded(false)
     }
